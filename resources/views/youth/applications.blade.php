@@ -17,7 +17,7 @@
                 @foreach($applications as $app)
                     <tr class="hover:bg-gray-100">
                         <td class="border p-2">{{ $app->opportunity->title }}</td>
-                        <td class="border p-2">{{ $app->opportunity->organization->name }}</td>
+                        <td class="border p-2">{{ $app->opportunity->organization->name ?? ($app->opportunity->organization->user->name ?? 'N/A') }}</td>
                         <td class="border p-2">{{ $app->status }}</td>
                         <td class="border p-2">{{ $app->opportunity->deadline }}</td>
                     </tr>

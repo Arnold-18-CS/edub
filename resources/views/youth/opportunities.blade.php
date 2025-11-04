@@ -23,7 +23,7 @@
                     <h3 class="font-semibold text-lg">{{ $opp->title }}</h3>
                     <p>{{ $opp->description }}</p>
                     <p class="text-gray-600">
-                        Organization: {{ $opp->organization->name }} | Deadline: {{ $opp->deadline }} | Seats: {{ $opp->seats }}
+                        Organization: {{ $opp->organization->name ?? ($opp->organization->user->name ?? 'N/A') }} | Deadline: {{ $opp->deadline }} | Seats: {{ $opp->available_slots }}
                     </p>
                     <form method="POST" action="{{ route('opportunity.apply', $opp->id) }}">
                         @csrf

@@ -16,8 +16,8 @@
             <tbody>
                 @foreach($applications as $app)
                     <tr class="hover:bg-gray-100">
-                        <td class="border p-2">{{ $app->user->name }}</td>
-                        <td class="border p-2">{{ $app->user->email }}</td>
+                        <td class="border p-2">{{ $app->youthProfile->user->name ?? 'N/A' }}</td>
+                        <td class="border p-2">{{ $app->youthProfile->user->email ?? 'N/A' }}</td>
                         <td class="border p-2">{{ $app->status }}</td>
                         <td class="border p-2">
                             <form method="POST" action="{{ route('organization.application.status', $app->id) }}">

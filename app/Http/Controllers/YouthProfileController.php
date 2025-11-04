@@ -19,8 +19,11 @@ class YouthProfileController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        // Get or create a blank profile for this user
-        $profile = YouthProfile::firstOrCreate(['user_id' => $user->id]);
+        // Get or create profile with default full_name
+        $profile = YouthProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['full_name' => $user->name] // required database column
+        );
 
         return view('youth.profile', compact('user', 'profile'));
     }
@@ -36,7 +39,11 @@ class YouthProfileController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $profile = YouthProfile::firstOrCreate(['user_id' => $user->id]);
+        // Get or create profile with default full_name
+        $profile = YouthProfile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['full_name' => $user->name]
+        );
 
         return view('youth.edit-profile', compact('user', 'profile'));
     }
@@ -52,6 +59,7 @@ class YouthProfileController extends Controller
             abort(403, 'Unauthorized access');
         }
 
+        // Validate incoming request
         $validated = $request->validate([
             'full_name' => 'required|string|max:255',
             'gender' => 'nullable|string|max:20',
@@ -64,6 +72,13 @@ class YouthProfileController extends Controller
             'location' => 'nullable|string|max:100',
         ]);
 
+        // Convert skills string to array if provided
+        if (isset($validated['skills']) && is_string($validated['skills'])) {
+            $skillsArray = array_map('trim', explode(',', $validated['skills']));
+            $validated['skills'] = array_filter($skillsArray); // Remove empty values
+        }
+
+        // Update or create the profile
         $profile = YouthProfile::updateOrCreate(
             ['user_id' => $user->id],
             $validated

@@ -28,7 +28,7 @@
                 <li class="border p-4 mb-2 rounded">
                     <h3 class="font-semibold text-lg">{{ $opp->title }}</h3>
                     <p>{{ $opp->description }}</p>
-                    <p class="text-gray-600">Deadline: {{ $opp->deadline }} | Seats: {{ $opp->seats }}</p>
+                    <p class="text-gray-600">Deadline: {{ $opp->deadline }} | Seats: {{ $opp->available_slots }}</p>
                     <a href="{{ route('organization.applicants', $opp->id) }}" class="text-blue-500">View Applicants</a>
                 </li>
             @endforeach
