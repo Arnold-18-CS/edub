@@ -11,6 +11,22 @@ use App\Http\Controllers\YouthProfileController;
 
 Route::get('/', function () { return view('welcome'); });
 
+// Dashboard route that redirects based on user role
+Route::middleware(['auth'])->get('/dashboard', function () {
+    $user = auth()->user();
+    
+    if ($user->role === 'Admin') {
+        return redirect()->route('admin.dashboard');
+    } elseif ($user->role === 'Organization') {
+        return redirect()->route('organization.dashboard');
+    } elseif ($user->role === 'Youth') {
+        return redirect()->route('opportunities.list');
+    }
+    
+    // Default fallback
+    return redirect()->route('profile.edit');
+})->name('dashboard');
+
 Route::middleware(['auth', 'role:Organization'])->group(function () {
 
     // Dashboard - list organization’s own opportunities
