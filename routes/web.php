@@ -30,7 +30,6 @@ Route::get('/dashboard', function () {
     return redirect()->route('profile.edit');
 })->name('dashboard');
 
-
 // Organization routes
 Route::middleware(['auth', 'role:Organization'])->group(function () {
 
@@ -50,7 +49,6 @@ Route::middleware(['auth', 'role:Organization'])->group(function () {
     Route::get('/organization/profile', [ProfileController::class, 'edit'])->name('organization.profile.edit');
     Route::patch('/organization/profile', [ProfileController::class, 'update'])->name('organization.profile.update');
 });
-
 
 // Youth routes
 Route::middleware(['auth', 'role:Youth'])->group(function () {
@@ -74,7 +72,6 @@ Route::middleware(['auth', 'role:Youth'])->group(function () {
     Route::get('/certificates', [CertificateController::class, 'index'])->name('youth.certificates');
 });
 
-
 // Admin routes
 Route::middleware(['auth', 'role:Admin'])->group(function () {
 
@@ -82,13 +79,12 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 
     // Verify or revoke organizations
-    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verify');
-    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revoke');
+    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verifyOrg');
+    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revokeOrg');
 
     // Optionally, view applications or opportunities
     // Route::get('/admin/opportunities', [AdminController::class, 'viewOpportunities'])->name('admin.opportunities');
 });
-
 
 // Role-based /profile route
 Route::middleware(['auth'])->group(function () {
