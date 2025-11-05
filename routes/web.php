@@ -74,8 +74,8 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     // Verify or revoke organizations
-    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verify');
-    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revoke');
+    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verifyOrg');
+    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revokeOrg');
 
     // Optionally, view applications or opportunities
     // Route::get('/admin/opportunities', [AdminController::class, 'viewOpportunities'])->name('admin.opportunities');
