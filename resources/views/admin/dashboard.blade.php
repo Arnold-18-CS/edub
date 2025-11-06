@@ -1,74 +1,82 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-3xl text-gray-900 dark:text-gray-100 tracking-wide">
             {{ __('Admin Dashboard') }}
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-10 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            {{-- ✅ Flash Success Message --}}
+
+            {{-- ✅ Flash Messages --}}
             @if(session('success'))
-                <div class="bg-green-100 text-green-700 p-4 mb-4 rounded">
+                <div class="bg-green-100 border border-green-400 text-green-800 px-6 py-3 mb-6 rounded-lg shadow">
                     {{ session('success') }}
                 </div>
             @endif
 
-            {{-- ✅ Flash Error Message --}}
             @if(session('error'))
-                <div class="bg-red-100 text-red-700 p-4 mb-4 rounded">
+                <div class="bg-red-100 border border-red-400 text-red-800 px-6 py-3 mb-6 rounded-lg shadow">
                     {{ session('error') }}
                 </div>
             @endif
 
-            <h1 class="text-2xl font-bold mb-4 text-center">Admin Dashboard</h1>
+            <h1 class="text-2xl md:text-3xl font-extrabold mb-10 text-center text-gray-800 dark:text-gray-100">
+                Admin Dashboard Overview
+            </h1>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{-- ✅ Two-column Grid --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
                 {{-- ✅ Organizations Table --}}
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
-                    <div class="bg-blue-600 text-white px-6 py-4 font-semibold">
+                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden transition transform hover:-translate-y-1 hover:shadow-xl duration-300">
+                    <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white px-6 py-4 font-semibold text-lg">
                         Registered Organizations
                     </div>
                     <div class="p-6">
                         @if($organizations->isEmpty())
-                            <p class="text-gray-500 dark:text-gray-400 text-center">No organizations found.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No organizations found.</p>
                         @else
-                            <div class="overflow-x-auto">
-                                <table class="w-full border-collapse">
-                                    <thead class="bg-gray-100 dark:bg-gray-700">
+                            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                                <table class="w-full border-collapse text-sm md:text-base">
+                                    <thead class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                         <tr>
-                                            <th class="border p-2 text-left">#</th>
-                                            <th class="border p-2 text-left">Name</th>
-                                            <th class="border p-2 text-left">Email</th>
-                                            <th class="border p-2 text-left">Status</th>
-                                            <th class="border p-2 text-center">Action</th>
+                                            <th class="border-b p-3 text-left">#</th>
+                                            <th class="border-b p-3 text-left">Name</th>
+                                            <th class="border-b p-3 text-left">Email</th>
+                                            <th class="border-b p-3 text-left">Status</th>
+                                            <th class="border-b p-3 text-center">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                         @foreach($organizations as $index => $org)
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td class="border p-2">{{ $index + 1 }}</td>
-                                                <td class="border p-2">{{ $org->name }}</td>
-                                                <td class="border p-2">{{ $org->email }}</td>
-                                                <td class="border p-2">
+                                            <tr class="hover:bg-blue-50 dark:hover:bg-gray-700 transition">
+                                                <td class="p-3">{{ $index + 1 }}</td>
+                                                <td class="p-3 font-medium">{{ $org->name }}</td>
+                                                <td class="p-3">{{ $org->email }}</td>
+                                                <td class="p-3">
                                                     @if($org->verified)
-                                                        <span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">Verified</span>
+                                                        <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            Verified
+                                                        </span>
                                                     @else
-                                                        <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs">Pending</span>
+                                                        <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            Pending
+                                                        </span>
                                                     @endif
                                                 </td>
-                                                <td class="border p-2 text-center">
+                                                <td class="p-3 text-center">
                                                     @if(!$org->verified)
                                                         <form action="{{ route('admin.verifyOrg', $org->id) }}" method="POST" class="inline">
                                                             @csrf
-                                                            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                                                            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
                                                                 Verify
                                                             </button>
                                                         </form>
                                                     @else
                                                         <form action="{{ route('admin.revokeOrg', $org->id) }}" method="POST" class="inline">
                                                             @csrf
-                                                            <button type="submit" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                                                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition">
                                                                 Revoke
                                                             </button>
                                                         </form>
@@ -84,29 +92,29 @@
                 </div>
 
                 {{-- ✅ Youth Table --}}
-                <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg overflow-hidden">
-                    <div class="bg-gray-600 text-white px-6 py-4 font-semibold">
+                <div class="bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden transition transform hover:-translate-y-1 hover:shadow-xl duration-300">
+                    <div class="bg-gradient-to-r from-gray-700 to-gray-500 text-white px-6 py-4 font-semibold text-lg">
                         Registered Youth
                     </div>
                     <div class="p-6">
                         @if($youth->isEmpty())
-                            <p class="text-gray-500 dark:text-gray-400 text-center">No youth registered yet.</p>
+                            <p class="text-gray-500 dark:text-gray-400 text-center py-4">No youth registered yet.</p>
                         @else
-                            <div class="overflow-x-auto">
-                                <table class="w-full border-collapse">
-                                    <thead class="bg-gray-100 dark:bg-gray-700">
+                            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                                <table class="w-full border-collapse text-sm md:text-base">
+                                    <thead class="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                         <tr>
-                                            <th class="border p-2 text-left">#</th>
-                                            <th class="border p-2 text-left">Name</th>
-                                            <th class="border p-2 text-left">Email</th>
+                                            <th class="border-b p-3 text-left">#</th>
+                                            <th class="border-b p-3 text-left">Name</th>
+                                            <th class="border-b p-3 text-left">Email</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                         @foreach($youth as $index => $user)
-                                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td class="border p-2">{{ $index + 1 }}</td>
-                                                <td class="border p-2">{{ $user->name }}</td>
-                                                <td class="border p-2">{{ $user->email }}</td>
+                                            <tr class="hover:bg-blue-50 dark:hover:bg-gray-700 transition">
+                                                <td class="p-3">{{ $index + 1 }}</td>
+                                                <td class="p-3 font-medium">{{ $user->name }}</td>
+                                                <td class="p-3">{{ $user->email }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -117,9 +125,10 @@
                 </div>
             </div>
 
-            {{-- ✅ Optional: Quick Refresh Button --}}
-            <div class="text-center mt-6">
-                <a href="{{ route('admin.dashboard') }}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+            {{-- ✅ Refresh Button --}}
+            <div class="text-center mt-10">
+                <a href="{{ route('admin.dashboard') }}"
+                   class="inline-block bg-gradient-to-r from-blue-500 to-green-500 text-white px-6 py-3 rounded-full text-sm md:text-base font-semibold shadow hover:opacity-90 transition">
                     Refresh Dashboard
                 </a>
             </div>

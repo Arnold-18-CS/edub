@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\CertificateController;
@@ -9,15 +8,14 @@ use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\YouthProfileController;
+use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', function () { return view('welcome'); });
 
 // Dashboard route that redirects based on user role
-Route::get('/dashboard', function () {
+Route::middleware(['auth'])->get('/dashboard', function () {
     $user = Auth::user();
-
+    
     if ($user->role === 'Admin') {
         return redirect()->route('admin.dashboard');
     } elseif ($user->role === 'Organization') {
@@ -25,12 +23,11 @@ Route::get('/dashboard', function () {
     } elseif ($user->role === 'Youth') {
         return redirect()->route('opportunities.list');
     }
-
+    
     // Default fallback
     return redirect()->route('profile.edit');
 })->name('dashboard');
 
-// Organization routes
 Route::middleware(['auth', 'role:Organization'])->group(function () {
 
     // Dashboard - list organization’s own opportunities
@@ -45,12 +42,12 @@ Route::middleware(['auth', 'role:Organization'])->group(function () {
     // Update application status
     Route::post('/organization/application/{id}/status', [OrganizationController::class, 'updateApplicationStatus'])->name('organization.application.status');
 
-    // Organization Profile
+    // Organization Profile (optional)
     Route::get('/organization/profile', [ProfileController::class, 'edit'])->name('organization.profile.edit');
     Route::patch('/organization/profile', [ProfileController::class, 'update'])->name('organization.profile.update');
 });
 
-// Youth routes
+
 Route::middleware(['auth', 'role:Youth'])->group(function () {
 
     // Youth Profile
@@ -72,36 +69,21 @@ Route::middleware(['auth', 'role:Youth'])->group(function () {
     Route::get('/certificates', [CertificateController::class, 'index'])->name('youth.certificates');
 });
 
-// Admin routes
+
 Route::middleware(['auth', 'role:Admin'])->group(function () {
 
     // Dashboard
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-
     // Verify or revoke organizations
-    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verifyOrg');
-    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revokeOrg');
+    Route::post('/admin/verify/{id}', [AdminController::class, 'verifyOrg'])->name('admin.verify');
+    Route::post('/admin/revoke/{id}', [AdminController::class, 'revokeOrg'])->name('admin.revoke');
 
     // Optionally, view applications or opportunities
     // Route::get('/admin/opportunities', [AdminController::class, 'viewOpportunities'])->name('admin.opportunities');
 });
 
-// Role-based /profile route
 Route::middleware(['auth'])->group(function () {
-
-    Route::get('/profile', function () {
-        $user = Auth::user();
-
-        if ($user->role === 'Youth') {
-            return redirect()->route('youth.profile');
-        } elseif ($user->role === 'Organization') {
-            return redirect()->route('organization.profile.edit');
-        } else {
-            // fallback for Admin or others
-            return view('profile.edit', ['user' => $user]);
-        }
-    })->name('profile.edit');
-
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
