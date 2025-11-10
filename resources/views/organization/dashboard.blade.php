@@ -41,19 +41,62 @@
     </div>
 
     {{-- List of Organization Opportunities --}}
-    <h2 class="text-xl font-semibold mb-2">Your Opportunities</h2>
+    <h2 class="text-xl font-semibold mb-4">Your Opportunities</h2>
     @if($opportunities->isEmpty())
-        <p>You haven't created any opportunities yet.</p>
+        <div class="card text-center py-8">
+            <p class="text-gray-500">You haven't created any opportunities yet.</p>
+        </div>
     @else
-        <ul>
+        <div class="space-y-4">
             @foreach($opportunities as $opp)
-                <li class="border p-4 mb-2 rounded">
-                    <h3 class="font-semibold text-lg">{{ $opp->title }}</h3>
-                    <p>{{ $opp->description }}</p>
-                    <p class="text-gray-600">Deadline: {{ $opp->deadline }} | Seats: {{ $opp->available_slots }}</p>
-                    <a href="{{ route('organization.applicants', $opp->id) }}" class="text-blue-500">View Applicants</a>
-                </li>
+                <div class="card border-l-4 {{ $opp->status === 'published' ? 'border-green-500' : 'border-yellow-500' }}">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-start justify-between mb-2">
+                                <h3 class="font-semibold text-lg text-gray-800">{{ $opp->title }}</h3>
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold 
+                                    @if($opp->status === 'published') bg-green-100 text-green-800
+                                    @elseif($opp->status === 'closed') bg-gray-100 text-gray-800
+                                    @else bg-yellow-100 text-yellow-800
+                                    @endif">
+                                    {{ ucfirst($opp->status ?? 'draft') }}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 mb-2">{{ Str::limit($opp->description, 150) }}</p>
+                            <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                                <span>Deadline: {{ \Carbon\Carbon::parse($opp->deadline)->format('M d, Y') }}</span>
+                                <span>Seats: {{ $opp->available_slots }}</span>
+                                <span>Applications: {{ $opp->applications_count ?? 0 }}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            @if($opp->status === 'published')
+                                <form action="{{ route('opportunities.unpublish', $opp->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-semibold transition">
+                                        Unpublish
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('opportunities.publish', $opp->id) }}" method="POST" class="inline">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-semibold transition">
+                                        Publish
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('organization.applicants', $opp->id) }}" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition text-center">
+                                View Applicants
+                            </a>
+                        </div>
+                    </div>
+                    @if($opp->status === 'draft' && isset($organization) && $organization->user && !$organization->user->verified)
+                        <div class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                            ⚠️ Your organization must be verified by an admin before you can publish this opportunity.
+                        </div>
+                    @endif
+                </div>
             @endforeach
-        </ul>
+        </div>
     @endif
 </x-app-layout>

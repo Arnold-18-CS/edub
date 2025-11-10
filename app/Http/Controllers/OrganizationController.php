@@ -21,7 +21,7 @@ class OrganizationController extends Controller
         }
 
         // Get organization for this user
-        $organization = \App\Models\Organization::where('user_id', $user->id)->first();
+        $organization = \App\Models\Organization::with('user')->where('user_id', $user->id)->first();
         
         if (!$organization) {
             $opportunities = collect([]);
@@ -32,7 +32,7 @@ class OrganizationController extends Controller
                 ->get();
         }
 
-        return view('organization.dashboard', compact('opportunities'));
+        return view('organization.dashboard', compact('opportunities', 'organization'));
     }
 
     /**

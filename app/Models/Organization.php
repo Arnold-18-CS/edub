@@ -14,11 +14,14 @@ class Organization extends Model
         'contact_phone',
         'location',
         'description',
+        'bio',
+        'skills',
         'verified',
     ];
 
     protected $casts = [
         'verified' => 'boolean',
+        'skills' => 'array',
     ];
 
     public function user()

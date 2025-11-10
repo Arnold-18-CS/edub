@@ -2,12 +2,14 @@
     <form method="POST" action="{{ route('register') }}" x-data="{ selectedRole: '{{ old('role', 'Youth') }}' }">
         @csrf
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
-        </div>
+        <!-- Name (Only for Youth) -->
+        <template x-if="selectedRole === 'Youth'">
+            <div>
+                <x-input-label for="name" :value="__('Name')" />
+                <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
+                <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            </div>
+        </template>
 
         <!-- Email Address -->
         <div class="mt-4">
@@ -110,6 +112,24 @@
                     <x-input-label for="organization_description" :value="__('Organization Description (Optional)')" />
                     <textarea id="organization_description" name="organization_description" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('organization_description') }}</textarea>
                     <x-input-error :messages="$errors->get('organization_description')" class="mt-2" />
+                </div>
+                
+                {{-- Additional Fields Similar to Youth Profile --}}
+                <div class="mt-4 pt-4 border-t border-blue-200">
+                    <h4 class="text-md font-semibold text-blue-600 mb-3">Additional Information</h4>
+                    
+                    <div>
+                        <x-input-label for="bio" :value="__('Bio/About Us (Optional)')" />
+                        <textarea id="bio" name="bio" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Tell us about your organization...">{{ old('bio') }}</textarea>
+                        <x-input-error :messages="$errors->get('bio')" class="mt-2" />
+                    </div>
+                    
+                    <div class="mt-4">
+                        <x-input-label for="skills" :value="__('Skills/Expertise Areas (Optional, comma-separated)')" />
+                        <x-text-input id="skills" name="skills" type="text" class="mt-1 block w-full" :value="old('skills')" placeholder="e.g., Education, Healthcare, Technology, Community Development" />
+                        <p class="mt-1 text-xs text-gray-500">List the areas your organization specializes in</p>
+                        <x-input-error :messages="$errors->get('skills')" class="mt-2" />
+                    </div>
                 </div>
             </div>
         </template>

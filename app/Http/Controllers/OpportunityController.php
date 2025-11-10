@@ -19,17 +19,18 @@ class OpportunityController extends Controller
         }
 
         // Get organization for this user
-        $organization = \App\Models\Organization::where('user_id', $user->id)->first();
+        $organization = \App\Models\Organization::with('user')->where('user_id', $user->id)->first();
         
         if (!$organization) {
             $opportunities = collect([]);
         } else {
             $opportunities = Opportunity::where('organization_id', $organization->id)
+                ->withCount('applications')
                 ->latest()
                 ->get();
         }
 
-        return view('organization.dashboard', compact('opportunities'));
+        return view('organization.dashboard', compact('opportunities', 'organization'));
     }
 
     // Create opportunity (Organization only)
@@ -56,10 +57,17 @@ class OpportunityController extends Controller
         ]);
 
         // Get or create organization record for this user
-        $organization = \App\Models\Organization::firstOrCreate(
+        $organization = \App\Models\Organization::with('user')->firstOrCreate(
             ['user_id' => $user->id],
             ['name' => $user->name, 'contact_email' => $user->email]
         );
+
+        // Reload organization to get user relationship
+        $organization->load('user');
+
+        // Check if organization is verified - auto-publish if verified
+        $isVerified = $organization->user && $organization->user->verified;
+        $status = $isVerified ? 'published' : 'draft';
 
         // Process required_skills if provided (convert comma-separated to array)
         $requiredSkills = null;
@@ -79,10 +87,14 @@ class OpportunityController extends Controller
             'required_education_level' => $validated['required_education_level'] ?? null,
             'required_skills' => $requiredSkills,
             'preferred_location' => $validated['preferred_location'] ?? null,
-            'status'          => 'draft', // Default to draft, organization can publish later
+            'status'          => $status, // Auto-publish if organization is verified
         ]);
 
-        return redirect()->back()->with('success', 'Opportunity created successfully!');
+        $message = $isVerified 
+            ? 'Opportunity created and published successfully! It is now visible to youth.'
+            : 'Opportunity created successfully! Please publish it after your organization is verified by an admin.';
+
+        return redirect()->back()->with('success', $message);
     }
 
     // Youth view: list all verified opportunities
@@ -124,5 +136,48 @@ class OpportunityController extends Controller
         }
         
         return view('show', compact('opportunity'));
+    }
+
+    // Publish an opportunity
+    public function publish($id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'Organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organization = \App\Models\Organization::where('user_id', $user->id)->firstOrFail();
+        $opportunity = Opportunity::where('organization_id', $organization->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        // Ensure organization is verified before publishing
+        if (!$organization->user || !$organization->user->verified) {
+            return redirect()->back()->with('error', 'Your organization must be verified by an admin before you can publish opportunities.');
+        }
+
+        $opportunity->update(['status' => 'published']);
+
+        return redirect()->back()->with('success', 'Opportunity published successfully! It is now visible to youth.');
+    }
+
+    // Unpublish an opportunity
+    public function unpublish($id)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'Organization') {
+            abort(403, 'Unauthorized');
+        }
+
+        $organization = \App\Models\Organization::where('user_id', $user->id)->firstOrFail();
+        $opportunity = Opportunity::where('organization_id', $organization->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $opportunity->update(['status' => 'draft']);
+
+        return redirect()->back()->with('success', 'Opportunity unpublished. It is no longer visible to youth.');
     }
 }
