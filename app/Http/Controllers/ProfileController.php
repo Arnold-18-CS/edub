@@ -20,6 +20,8 @@ class ProfileController extends Controller
 
         // Load a different profile page based on role
         if ($user->role === 'Organization') {
+            // Load organization relationship for organization profile
+            $user->load('organization');
             return view('organization.profile', compact('user'));
         } elseif ($user->role === 'Youth') {
             return view('youth.profile', compact('user'));
@@ -44,11 +46,23 @@ class ProfileController extends Controller
 
         // Example: allow extra custom fields per role
         if ($user->role === 'Youth') {
-            $user->bio = $request->input('bio');
-            $user->skills = $request->input('skills');
+            // Update youth profile instead of user record
+            $youthProfile = \App\Models\YouthProfile::where('user_id', $user->id)->first();
+            if ($youthProfile) {
+                $youthProfile->update([
+                    'bio' => $request->input('bio'),
+                    'skills' => $request->input('skills'),
+                ]);
+            }
         } elseif ($user->role === 'Organization') {
-            $user->organization_name = $request->input('organization_name');
-            $user->description = $request->input('description');
+            // Update organization record instead of user record
+            $organization = \App\Models\Organization::where('user_id', $user->id)->first();
+            if ($organization) {
+                $organization->update([
+                    'name' => $request->input('organization_name'),
+                    'description' => $request->input('description'),
+                ]);
+            }
         }
 
         $user->save();

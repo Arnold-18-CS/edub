@@ -1,7 +1,7 @@
 # Post-Update Setup Guide - Complete Edition
 
-**Last Updated**: Latest update with logo removal and blue-white theme  
-**Version**: 3.0
+**Last Updated**: After database error fixes and verified column migration  
+**Version**: 4.1
 
 ---
 
@@ -16,11 +16,16 @@ This guide provides **step-by-step instructions** to set up the EduBridge projec
 1. **Logo Removal**: All EduBridge logo components removed, replaced with text "EduBridge"
 2. **Theme Consistency**: Blue-white theme applied across ALL pages
 3. **Registration Fix**: Dynamic organization fields for Admin/Organization roles
-4. **Bug Fixes**: 
+4. **Database Error Fixes**: 
+   - Fixed `organization_name` and `description` columns error (removed from User model)
+   - Fixed `bio` and `skills` columns error (now saved to YouthProfile model)
+   - Added `verified` column migration for users table
+   - Fixed ProfileController to use correct models
+5. **Bug Fixes**: 
    - Fixed duplicate code in ApplicationController
    - Fixed opportunity visibility query (checks User.verified, not Organization.verified)
    - Fixed Organization model relationship
-5. **Component Updates**: All components updated to blue theme
+6. **Component Updates**: All components updated to blue theme
 
 ---
 
@@ -59,7 +64,7 @@ composer dump-autoload
 
 ### Step 3: Run Database Migrations
 
-**CRITICAL**: The 2FA feature requires a new table. Run migrations:
+**CRITICAL**: New migrations are required. Run migrations:
 
 ```bash
 php artisan migrate
@@ -67,6 +72,9 @@ php artisan migrate
 
 **Expected Output**: 
 - Creates `two_factor_authentications` table
+- Creates `documents` table
+- Adds eligibility criteria fields to `opportunities` table
+- Adds `verified` column to `users` table
 - All existing tables remain intact
 
 **If Migration Fails**:

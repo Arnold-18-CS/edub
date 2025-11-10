@@ -70,12 +70,6 @@ class RegisteredUserController extends Controller
                 'description' => $validated['organization_description'] ?? null,
                 'verified' => $validated['role'] === 'Admin', // Auto-verify Admin organizations
             ]);
-
-            // Also store organization name in user model for easy access
-            $user->update([
-                'organization_name' => $validated['organization_name'],
-                'description' => $validated['organization_description'] ?? null,
-            ]);
         }
 
         // Auto-verify Admin users
