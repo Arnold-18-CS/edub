@@ -51,6 +51,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
     public function youthProfile()
     {
         return $this->hasOne(YouthProfile::class);
@@ -60,3 +61,4 @@ class User extends Authenticatable
     {
         return $this->hasOne(Organization::class);
     }
+}
