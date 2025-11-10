@@ -13,7 +13,20 @@ class ApplicationController extends Controller
     public function apply($id, Request $request)
     {
         $user = Auth::user();
-        $opportunity = Opportunity::findOrFail($id);
+        
+        if ($user->role !== 'Youth') {
+            abort(403, 'Only youth can apply for opportunities.');
+        }
+        
+        $opportunity = Opportunity::with(['organization', 'organization.user'])->findOrFail($id);
+        
+        // Ensure opportunity is from a verified organization
+        if (!$opportunity->organization || !$opportunity->organization->user || !$opportunity->organization->user->verified) {
+            return redirect()->back()->with('error', 'This opportunity is not available.');
+        }
+
+        // Get or create youth profile
+        $youthProfile = \App\Models\YouthProfile::firstOrCreate(['user_id' => $user->id]);
 
         // Get or create youth profile
         $youthProfile = \App\Models\YouthProfile::firstOrCreate(['user_id' => $user->id]);

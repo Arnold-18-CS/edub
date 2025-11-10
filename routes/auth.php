@@ -57,3 +57,15 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
+
+// Two-Factor Authentication Routes (no auth middleware - user is logged out temporarily)
+Route::middleware('guest')->group(function () {
+    Route::get('2fa', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'show'])
+        ->name('2fa.show');
+    
+    Route::post('2fa/verify', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'verify'])
+        ->name('2fa.verify');
+    
+    Route::post('2fa/resend', [\App\Http\Controllers\Auth\TwoFactorAuthController::class, 'resend'])
+        ->name('2fa.resend');
+});

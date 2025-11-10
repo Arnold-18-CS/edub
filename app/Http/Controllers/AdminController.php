@@ -19,6 +19,12 @@ class AdminController extends Controller
     public function verifyOrg($id)
     {
         $organization = User::findOrFail($id);
+        
+        // Ensure it's actually an organization
+        if ($organization->role !== 'Organization') {
+            return redirect()->back()->with('error', 'Only organizations can be verified.');
+        }
+        
         $organization->verified = true;
         $organization->save();
 
@@ -29,6 +35,12 @@ class AdminController extends Controller
     public function revokeOrg($id)
     {
         $organization = User::findOrFail($id);
+        
+        // Ensure it's actually an organization
+        if ($organization->role !== 'Organization') {
+            return redirect()->back()->with('error', 'Only organizations can have verification revoked.');
+        }
+        
         $organization->verified = false;
         $organization->save();
 

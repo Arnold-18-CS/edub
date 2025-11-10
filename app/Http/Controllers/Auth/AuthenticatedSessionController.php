@@ -28,7 +28,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Generate and send 2FA code
+        $user = Auth::user();
+        \App\Http\Controllers\Auth\TwoFactorAuthController::sendCode($user);
+
+        // Store user ID in session for 2FA verification
+        session(['2fa_user_id' => $user->id]);
+
+        // Logout the user temporarily until 2FA is verified
+        Auth::logout();
+
+        return redirect()->route('2fa.show');
     }
 
     /**

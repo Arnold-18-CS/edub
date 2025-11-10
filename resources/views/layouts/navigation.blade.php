@@ -88,6 +88,22 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(Auth::user()->role === 'Youth')
+                <x-responsive-nav-link :href="route('opportunities.list')" :active="request()->routeIs('opportunities.*')">
+                    Opportunities
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('applications.my')" :active="request()->routeIs('applications.*')">
+                    My Applications
+                </x-responsive-nav-link>
+            @elseif(Auth::user()->role === 'Organization')
+                <x-responsive-nav-link :href="route('organization.dashboard')" :active="request()->routeIs('organization.*')">
+                    My Opportunities
+                </x-responsive-nav-link>
+            @elseif(Auth::user()->role === 'Admin')
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                    Admin Panel
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -95,6 +111,7 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                <div class="font-medium text-xs text-blue-600 mt-1">{{ Auth::user()->role }}</div>
             </div>
 
             <div class="mt-3 space-y-1">

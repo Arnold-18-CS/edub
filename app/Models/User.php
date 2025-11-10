@@ -52,8 +52,11 @@ class User extends Authenticatable
         ];
     }
     public function youthProfile()
-{
-    return $this->hasOne(YouthProfile::class);
-}
+    {
+        return $this->hasOne(YouthProfile::class);
+    }
 
-}
+    public function organization()
+    {
+        return $this->hasOne(Organization::class);
+    }
