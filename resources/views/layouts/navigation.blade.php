@@ -1,20 +1,37 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white/90 backdrop-blur-md border-b-2 border-edubridge-pink shadow-lg">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
+        <div class="flex justify-between h-20">
+            <div class="flex items-center">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800 dark:text-gray-200" />
+                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
+                        <x-edubridge-logo class="h-12 w-auto group-hover:scale-105 transition-transform duration-200" />
+                        <span class="text-2xl font-bold gradient-text hidden sm:block">EduBridge</span>
                     </a>
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                <div class="hidden space-x-4 sm:-my-px sm:ms-10 sm:flex items-center">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="px-4 py-2 rounded-lg font-semibold transition-all">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(Auth::user()->role === 'Youth')
+                        <x-nav-link :href="route('opportunities.list')" :active="request()->routeIs('opportunities.*')" class="px-4 py-2 rounded-lg font-semibold transition-all">
+                            Opportunities
+                        </x-nav-link>
+                        <x-nav-link :href="route('applications.my')" :active="request()->routeIs('applications.*')" class="px-4 py-2 rounded-lg font-semibold transition-all">
+                            My Applications
+                        </x-nav-link>
+                    @elseif(Auth::user()->role === 'Organization')
+                        <x-nav-link :href="route('organization.dashboard')" :active="request()->routeIs('organization.*')" class="px-4 py-2 rounded-lg font-semibold transition-all">
+                            My Opportunities
+                        </x-nav-link>
+                    @elseif(Auth::user()->role === 'Admin')
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')" class="px-4 py-2 rounded-lg font-semibold transition-all">
+                            Admin Panel
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -22,8 +39,9 @@
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                        <button class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-edubridge-pink to-edubridge-pink-light text-white text-sm leading-4 font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none transition ease-in-out duration-150 transform hover:-translate-y-0.5">
                             <div>{{ Auth::user()->name }}</div>
+                            <span class="ml-2 text-xs bg-white/20 px-2 py-1 rounded-full">{{ Auth::user()->role }}</span>
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">

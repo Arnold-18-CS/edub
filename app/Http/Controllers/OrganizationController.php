@@ -20,10 +20,17 @@ class OrganizationController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $opportunities = Opportunity::where('organization_id', $user->id)
-            ->withCount('applications')
-            ->latest()
-            ->get();
+        // Get organization for this user
+        $organization = \App\Models\Organization::where('user_id', $user->id)->first();
+        
+        if (!$organization) {
+            $opportunities = collect([]);
+        } else {
+            $opportunities = Opportunity::where('organization_id', $organization->id)
+                ->withCount('applications')
+                ->latest()
+                ->get();
+        }
 
         return view('organization.dashboard', compact('opportunities'));
     }
@@ -39,11 +46,14 @@ class OrganizationController extends Controller
             abort(403, 'Unauthorized');
         }
 
-        $opportunity = Opportunity::where('organization_id', $user->id)
+        // Get organization for this user
+        $organization = \App\Models\Organization::where('user_id', $user->id)->firstOrFail();
+        
+        $opportunity = Opportunity::where('organization_id', $organization->id)
             ->where('id', $id)
             ->firstOrFail();
 
-        $applications = Application::with('user')
+        $applications = Application::with(['youthProfile.user'])
             ->where('opportunity_id', $opportunity->id)
             ->get();
 
@@ -62,8 +72,9 @@ class OrganizationController extends Controller
         $application = Application::findOrFail($id);
 
         $opportunity = $application->opportunity;
+        $organization = \App\Models\Organization::where('user_id', Auth::id())->first();
 
-        if ($opportunity->organization_id !== Auth::id()) {
+        if (!$organization || $opportunity->organization_id !== $organization->id) {
             abort(403, 'Unauthorized');
         }
 
