@@ -212,17 +212,33 @@ The database file will be created automatically when you run migrations (if you 
 
 ### Step 6: Run Database Migrations
 
-This creates all the necessary tables in your database:
+This creates all the necessary tables in your database. **Migrations are ordered correctly** to ensure dependencies are created before tables that reference them.
 
 ```bash
 php artisan migrate
 ```
 
+**Migration Order (Automatic):**
+1. Base Laravel tables (users, cache, jobs, sessions)
+2. Add role column to users table
+3. Add verified column to users table
+4. Create two_factor_authentications table (depends on users)
+5. Create youth_profiles table (depends on users)
+6. Create organizations table (depends on users)
+7. Add bio/skills to organizations table
+8. Create opportunities table (depends on organizations)
+9. Add eligibility criteria to opportunities table
+10. Create documents table (depends on users)
+11. Create applications table (depends on opportunities and youth_profiles)
+12. Create certificates table (depends on applications)
+
 **Expected Output:**
 ```
 Migration table created successfully.
-Migrating: 2025_11_04_112754_add_role_to_users_table
-Migrated:  2025_11_04_112754_add_role_to_users_table (X.XXs)
+Migrating: 0001_01_01_000000_create_users_table
+Migrated:  0001_01_01_000000_create_users_table (X.XXs)
+Migrating: 2025_01_01_000003_add_role_to_users_table
+Migrated:  2025_01_01_000003_add_role_to_users_table (X.XXs)
 ...
 ```
 
@@ -230,6 +246,8 @@ Migrated:  2025_11_04_112754_add_role_to_users_table (X.XXs)
 - Check database credentials in `.env`
 - Ensure database exists (for MySQL)
 - For SQLite, ensure `database/database.sqlite` exists and is writable
+- If you see "Base table or view already exists" errors, run: `php artisan migrate:fresh` (WARNING: This deletes all data!)
+- If foreign key constraint errors occur, ensure you're running migrations in order (they should run automatically in order)
 
 ---
 
@@ -414,18 +432,54 @@ php artisan cache:clear
 
 ### Issue 7: Migration Errors
 
-**Solution:**
+**Common Migration Errors:**
+
+**Error: "Base table or view already exists"**
 ```bash
-# Rollback all migrations
-php artisan migrate:rollback
+# Check migration status
+php artisan migrate:status
 
-# Then migrate again
-php artisan migrate
-
-# If tables already exist, use:
+# If migrations are out of sync, refresh:
 php artisan migrate:fresh
 # WARNING: This deletes all data!
+
+# Or rollback specific migration:
+php artisan migrate:rollback --step=1
+php artisan migrate
 ```
+
+**Error: "Foreign key constraint fails"**
+```bash
+# This should not happen with correct migration order
+# If it does, ensure migrations run in order:
+php artisan migrate:fresh
+php artisan migrate
+
+# Verify migration order:
+ls -1 database/migrations/*.php | sort
+```
+
+**Error: "Column already exists"**
+```bash
+# This happens when a migration tries to add a column that exists
+# Check if migration was partially run:
+php artisan migrate:status
+
+# Rollback and re-run:
+php artisan migrate:rollback --step=1
+php artisan migrate
+```
+
+**Migration Order Verification:**
+Migrations are automatically ordered by timestamp. The correct order is:
+1. Base tables (users, cache, jobs)
+2. User table modifications (role, verified)
+3. Tables depending on users (two_factor_authentications, youth_profiles, organizations, documents)
+4. Organization modifications
+5. Tables depending on organizations (opportunities)
+6. Opportunity modifications
+7. Tables depending on opportunities and youth_profiles (applications)
+8. Tables depending on applications (certificates)
 
 ---
 
@@ -444,7 +498,7 @@ php artisan key:generate
 
 # 4. Create database (MySQL) or SQLite file
 
-# 5. Run migrations
+# 5. Run migrations (automatically ordered correctly)
 php artisan migrate
 
 # 6. Seed test users (optional)
@@ -459,6 +513,36 @@ php artisan serve
 # 9. Access application
 # Open: http://localhost:8000
 ```
+
+## 🔄 Migration Order Details
+
+**Important:** Migrations are automatically ordered by timestamp. The current migration order ensures:
+
+✅ **Base tables created first:**
+- `users`, `cache`, `jobs`, `sessions`, `password_reset_tokens`
+
+✅ **User table modifications before dependent tables:**
+- `role` column added
+- `verified` column added
+
+✅ **Tables depending on users created next:**
+- `two_factor_authentications` (references users)
+- `youth_profiles` (references users)
+- `organizations` (references users)
+- `documents` (references users for both owner and verifier)
+
+✅ **Organization modifications before opportunities:**
+- `bio` and `skills` columns added to organizations
+
+✅ **Tables depending on organizations:**
+- `opportunities` (references organizations)
+- Eligibility criteria added to opportunities
+
+✅ **Tables depending on multiple tables created last:**
+- `applications` (references opportunities and youth_profiles)
+- `certificates` (references applications)
+
+**This order prevents foreign key constraint errors during migration.**
 
 ---
 
